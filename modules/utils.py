@@ -1,31 +1,27 @@
-from ebooklib import epub
-from bs4 import BeautifulSoup
+import fitz
 import tempfile
 import os
 
-def is_epub_file(filename):
-    return filename.lower().endswith(".epub")
+def is_pdf_file(filename):
+    return filename.lower().endswith(".pdf")
 
-def save_to_temporary_location(file):
-    #FIXME: Returning data is empty, assign it each heading
-    temp_path = os.path.join(tempfile.gettempdir(), file.filename)
-    file.save(temp_path)
+def save_to_temporary_location(pdf_file):
+    temp_path = os.path.join(tempfile.gettempdir(), pdf_file.filename)
+    pdf_file.save(temp_path)
     return temp_path
 
-def extract_headings_from_epub(epub_file):
+def extract_text_from_pdf(pdf_file):
     headings_data = {}
+    with fitz.open(pdf_file) as doc:
+        for i in range(doc.page_count):
+            page = doc[i]
+            text = page.get_text("text")
+            title = text.split("\n")[0]
 
-    book = epub.read_epub(epub_file)
+            page_data = {
+                "content": "".join(text.split("\n")[1:]),
+                "title": title
+            }
+            headings_data[f"Page {i + 1}"] = page_data
 
-    for i, item in enumerate(book.get_items_of_type(9)):  
-        html_content = item.get_body_content().decode('utf-8', errors='ignore')
-        soup = BeautifulSoup(html_content, 'html.parser')
-
-        headings = []
-        for heading_tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
-            heading_text = heading_tag.get_text(strip=True)
-            headings.append(heading_text)
-
-        headings_data[f"Page {i + 1}"] = headings
-
-    return headings_data
+    return headings_data 

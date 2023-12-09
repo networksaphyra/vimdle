@@ -1,5 +1,4 @@
 openai
 flask
 python-dotenv
-bs4
-EbookLib
+fitz
