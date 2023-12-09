@@ -12,6 +12,7 @@ selectFileButton.addEventListener("change", function() {
 });
 
 function sendDataToBackend(file) {
+    console.log("Sent Request...")
     const formData = new FormData();
     formData.append("file", file);
 
